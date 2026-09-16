@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Disaster Collaboration Dashboard</title>
+
+    <style>
+
+        body {
+            font-family: Arial;
+            background: #f2f4f7;
+            margin: 0;
+        }
+
+        .header {
+            background: #263238;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            width: 90%;
+            margin: 30px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #ccc;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #455a64;
+            color: white;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            background: #1565c0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .critical {
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <h1>Disaster Management Dashboard</h1>
+
+    <p>Group Decision Support & Collaboration</p>
+
+</div>
+
+
+<div class="container">
+
+
+    <!-- Disaster Information -->
+
+    <div class="card">
+
+        <h2>Disaster Reports</h2>
+
+        <table>
+
+            <tr>
+
+                <th>Type</th>
+                <th>Location</th>
+                <th>Affected</th>
+                <th>Medical</th>
+                <th>Road</th>
+                <th>Ambulances</th>
+                <th>Hospital Beds</th>
+                <th>Priority</th>
+                <th>Recommendation</th>
+
+            </tr>
+
+
+            {% for disaster in disasters %}
+
+            <tr>
+
+                <td>{{ disaster["disaster_type"] }}</td>
+
+                <td>{{ disaster["location"] }}</td>
+
+                <td>{{ disaster["people_affected"] }}</td>
+
+                <td>{{ disaster["medical_emergency"] }}</td>
+
+                <td>{{ disaster["road_status"] }}</td>
+
+                <td>{{ disaster["available_ambulances"] }}</td>
+
+                <td>{{ disaster["hospital_beds"] }}</td>
+
+                <td class="critical">
+                    {{ disaster["priority"] }}
+                </td>
+
+                <td>
+                    {{ disaster["recommendation"] }}
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </div>
+
+
+    <!-- CSCW Communication -->
+
+    <div class="card">
+
+        <h2>Stakeholder Communication</h2>
+
+        <form action="/message" method="POST">
+
+            <label>Stakeholder</label>
+
+            <select name="stakeholder">
+
+                <option>Police</option>
+
+                <option>Fire and Rescue</option>
+
+                <option>Medical Team</option>
+
+                <option>Hospital</option>
+
+                <option>Government Authority</option>
+
+                <option>NGO / Volunteer</option>
+
+            </select>
+
+
+            <label>Message / Situation Update</label>
+
+            <textarea
+                name="message"
+                rows="4"
+                placeholder="Enter emergency update..."
+                required>
+            </textarea>
+
+
+            <button type="submit">
+                Send Update
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- Messages -->
+
+    <div class="card">
+
+        <h2>Team Updates</h2>
+
+        {% for message in messages %}
+
+            <div>
+
+                <strong>
+                    {{ message["stakeholder"] }}
+                </strong>
+
+                <p>
+                    {{ message["message"] }}
+                </p>
+
+                <small>
+                    {{ message["created_at"] }}
+                </small>
+
+                <hr>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+</div>
+
+</body>
+
+</html>

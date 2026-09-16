@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Decision Result</title>
+
+    <style>
+
+        body {
+            font-family: Arial;
+            background: #f2f4f7;
+        }
+
+        .container {
+            width: 70%;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px #ccc;
+        }
+
+        .priority {
+            font-size: 30px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .recommendation {
+            padding: 20px;
+            background: #eeeeee;
+            border-radius: 5px;
+        }
+
+        li {
+            margin: 10px;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #1565c0;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Expert System Decision</h1>
+
+    <h2>Disaster: {{ disaster_type }}</h2>
+
+    <h3>Location: {{ location }}</h3>
+
+
+    <div class="priority">
+
+        Priority: {{ priority }}
+
+    </div>
+
+
+    <h2>System Recommendation</h2>
+
+    <div class="recommendation">
+
+        {{ recommendation }}
+
+    </div>
+
+
+    <h2>Expert System Reasoning</h2>
+
+    <ul>
+
+        {% for reason in reasons %}
+
+            <li>{{ reason }}</li>
+
+        {% endfor %}
+
+    </ul>
+
+
+    <a href="/">
+        Analyze Another Disaster
+    </a>
+
+    <a href="/dashboard">
+        Go to Dashboard
+    </a>
+
+</div>
+
+</body>
+
+</html>
