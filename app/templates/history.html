@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Decision Audit History & Log Trail{% endblock %}
+{% block header_title %}Immutable Decision Audit History & Audit Trail{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">📜 Finalized Emergency Decisions Audit Log</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Disaster Event</th>
+                <th>Decision Title / Issue</th>
+                <th>Baseline Expert Suggestion</th>
+                <th>Final Binding Decision</th>
+                <th>Finalized By</th>
+                <th>Opinions / Votes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for h in history_list %}
+            {% set d = h.details %}
+            <tr>
+                <td><strong>#{{ d.id }}</strong></td>
+                <td>{{ d.disaster_type }} ({{ d.location }})</td>
+                <td><strong>{{ d.title }}</strong></td>
+                <td style="font-size: 0.85rem; color: var(--primary);">{{ d.expert_recommendation or 'N/A' }}</td>
+                <td style="color: var(--success); font-weight: 700;">{{ d.final_decision }}</td>
+                <td><span class="role-badge">{{ d.finalized_by }}</span></td>
+                <td style="font-size: 0.85rem;">
+                    {{ h.opinions_count }} opinions | <strong>{{ h.votes_count }} votes</strong>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted);">No finalized decisions recorded in audit log yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">🛡️ System Activity & Operations Timeline (CSCW Audit Log)</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Timestamp</th>
+                <th>User / Commander</th>
+                <th>Role</th>
+                <th>Action Code</th>
+                <th>Action Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>#{{ log.id }}</td>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">{{ log.timestamp }}</td>
+                <td><strong>{{ log.username }}</strong></td>
+                <td><span class="role-badge">{{ log.role }}</span></td>
+                <td><strong style="color: var(--info);">{{ log.action }}</strong></td>
+                <td style="font-size: 0.85rem; color: var(--text-main);">{{ log.details }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted);">No activity logs found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

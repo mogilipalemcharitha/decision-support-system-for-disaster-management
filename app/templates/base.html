@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Disaster Management Expert System{% endblock %}</title>
+    
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Leaflet.js OpenStreetMap CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    {% if session.get('user_id') %}
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">🚨 DISASTER DSS</div>
+        </div>
+        
+        <ul class="nav-links">
+            <li><a href="{{ url_for('disaster.dashboard') }}" class="nav-link {% if request.endpoint == 'disaster.dashboard' %}active{% endif %}">📊 Dashboard</a></li>
+            <li><a href="{{ url_for('disaster.index') }}" class="nav-link {% if request.endpoint == 'disaster.index' %}active{% endif %}">⚡ Analyze Incident</a></li>
+            <li><a href="{{ url_for('resource.index') }}" class="nav-link {% if request.endpoint == 'resource.index' %}active{% endif %}">📦 Resources</a></li>
+            <li><a href="{{ url_for('gdss.index') }}" class="nav-link {% if request.endpoint == 'gdss.index' %}active{% endif %}">🗳️ GDSS Decisions</a></li>
+            <li><a href="{{ url_for('analytics.index') }}" class="nav-link {% if request.endpoint == 'analytics.index' %}active{% endif %}">📈 Analytics & Evaluation</a></li>
+            <li><a href="{{ url_for('gdss.history') }}" class="nav-link {% if request.endpoint == 'gdss.history' %}active{% endif %}">📜 Audit History</a></li>
+        </ul>
+
+        <div class="user-profile">
+            <div style="font-weight: 600;">{{ session.get('full_name') }}</div>
+            <span class="role-badge">{{ session.get('role') }}</span>
+            <div style="margin-top: 10px;">
+                <a href="{{ url_for('auth.logout') }}" style="color: var(--danger); text-decoration: none; font-size: 0.85rem; font-weight: 600;">🔒 Logout</a>
+            </div>
+        </div>
+    </aside>
+    {% endif %}
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper" {% if not session.get('user_id') %}style="margin-left: 0;"{% endif %}>
+        {% if session.get('user_id') %}
+        <header class="top-bar">
+            <div class="page-title">{% block header_title %}Command Center{% endblock %}</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">
+                System Status: <span style="color: var(--success); font-weight: 700;">🟢 ACTIVE OPERATIONAL</span>
+            </div>
+        </header>
+        {% endif %}
+
+        <main class="content-area">
+            <!-- Flash Alert Notifications -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, msg in messages %}
+                        <div class="flash-alert flash-{{ category }}">{{ msg }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+</body>
+</html>

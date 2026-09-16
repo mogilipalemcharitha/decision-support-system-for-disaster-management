@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics & Academic Evaluation Dashboard{% endblock %}
+{% block header_title %}Analytics & Academic Evaluation Dashboard{% endblock %}
+
+{% block content %}
+<!-- Academic Evaluation Metrics Header -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">📊 Academic System Evaluation Metrics</div>
+    </div>
+
+    <div class="grid-cols-4">
+        <div class="metric-card info">
+            <div class="metric-title">Disasters Evaluated</div>
+            <div class="metric-value">{{ total_disasters }}</div>
+        </div>
+        <div class="metric-card warning">
+            <div class="metric-title">Total Affected Population</div>
+            <div class="metric-value">{{ total_affected_pop }}</div>
+        </div>
+        <div class="metric-card success">
+            <div class="metric-title">Finalized Decisions</div>
+            <div class="metric-value">{{ total_decisions_made }}</div>
+        </div>
+        <div class="metric-card critical">
+            <div class="metric-title">Stakeholder Votes Cast</div>
+            <div class="metric-value">{{ total_votes_cast }}</div>
+        </div>
+    </div>
+
+    <div class="grid-cols-2">
+        <div class="metric-card success">
+            <div class="metric-title">Avg Stakeholder Consensus Rate</div>
+            <div class="metric-value">{{ avg_consensus }}%</div>
+            <small style="color: var(--text-muted);">Calculated quantitative consensus agreement across GDSS decision sessions.</small>
+        </div>
+        <div class="metric-card info">
+            <div class="metric-title">System Audit Log Events</div>
+            <div class="metric-value">{{ total_activities }}</div>
+            <small style="color: var(--text-muted);">Auditable trace records captured in real-time timeline.</small>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Graphical Visualizations Grid -->
+<div class="grid-cols-2">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">📈 Priority Score Distribution</div>
+        </div>
+        <canvas id="priorityChart" height="220"></canvas>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">🌪️ Disaster Events by Disaster Type</div>
+        </div>
+        <canvas id="typeChart" height="220"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">📦 Resource Inventory Stock Capacity</div>
+    </div>
+    <canvas id="resourceChart" height="180"></canvas>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. Priority Distribution Doughnut Chart
+    const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+    new Chart(priorityCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'],
+            datasets: [{
+                data: [
+                    {{ priority_dict.CRITICAL }},
+                    {{ priority_dict.HIGH }},
+                    {{ priority_dict.MEDIUM }},
+                    {{ priority_dict.LOW }}
+                ],
+                backgroundColor: ['#ef4444', '#f59e0b', '#06b6d4', '#10b981']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { labels: { color: '#f8fafc' } }
+            }
+        }
+    });
+
+    // 2. Disaster Types Bar Chart
+    const typeCtx = document.getElementById('typeChart').getContext('2d');
+    new Chart(typeCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ type_dict.keys()|list|tojson }},
+            datasets: [{
+                label: 'Disaster Count',
+                data: {{ type_dict.values()|list|tojson }},
+                backgroundColor: '#3b82f6'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { ticks: { color: '#f8fafc' } },
+                y: { ticks: { color: '#f8fafc' }, beginAtZero: true }
+            },
+            plugins: {
+                legend: { labels: { color: '#f8fafc' } }
+            }
+        }
+    });
+
+    // 3. Resource Stock Bar Chart
+    const resCtx = document.getElementById('resourceChart').getContext('2d');
+    new Chart(resCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ resource_dict.keys()|list|tojson }},
+            datasets: [{
+                label: 'Stock Quantity',
+                data: {{ resource_dict.values()|list|tojson }},
+                backgroundColor: '#10b981'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { ticks: { color: '#f8fafc' } },
+                y: { ticks: { color: '#f8fafc' }, beginAtZero: true }
+            },
+            plugins: {
+                legend: { labels: { color: '#f8fafc' } }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

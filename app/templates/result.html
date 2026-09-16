@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Explain Decision - Expert System Analysis{% endblock %}
+{% block header_title %}Explainable Expert System Decision Trace{% endblock %}
+
+{% block content %}
+<div style="max-width: 950px; margin: 0 auto;">
+    
+    <!-- Primary Priority & Recommendation Banner -->
+    <div class="card" style="border-left: 6px solid {% if priority == 'CRITICAL' %}var(--danger){% elif priority == 'HIGH' %}var(--warning){% elif priority == 'MEDIUM' %}var(--info){% else %}var(--success){% endif %};">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <span style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Inciting Disaster Event</span>
+                <h2 style="font-size: 1.6rem; color: var(--text-main);">{{ disaster_type }} at {{ location }}</h2>
+            </div>
+            <div style="text-align: right;">
+                <span class="badge badge-{{ priority|lower }}" style="font-size: 1.1rem; padding: 8px 18px;">
+                    PRIORITY: {{ priority }}
+                </span>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Computed Risk Score: <strong>{{ score }} points</strong></div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; background: #0f172a; padding: 18px; border-radius: 8px; border: 1px solid var(--border);">
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 6px;">
+                🤖 Expert System Strategic Recommendation
+            </div>
+            <p style="font-size: 1rem; color: var(--text-main); font-weight: 500; line-height: 1.6;">
+                {{ recommendation }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Recommended Resource Allocations Grid -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">📦 Recommended Resource Allocations (Human-in-the-Loop)</div>
+            <a href="{{ url_for('resource.index') }}" class="btn btn-secondary" style="font-size: 0.8rem;">Go to Resource Approval Center</a>
+        </div>
+        
+        <div class="grid-cols-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px;">
+            {% for rname, rqty in resource_recommendations.items() %}
+            <div style="background: #0f172a; padding: 14px; border-radius: 8px; text-align: center; border: 1px solid var(--border);">
+                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ rname }}</div>
+                <div style="font-size: 1.4rem; font-weight: 700; color: {% if rqty > 0 %}var(--primary){% else %}var(--text-muted){% endif %}; margin-top: 4px;">
+                    {{ rqty }} units
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Detailed Step-by-Step Reasoning Trace -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">🔍 Step-by-Step Reasoning & Triggered Rules</div>
+        </div>
+
+        <h4 style="color: var(--primary); margin-bottom: 10px;">1. Triggered Rule Executions</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rule ID</th>
+                    <th>Category</th>
+                    <th>Weight Points</th>
+                    <th>Rule Logic / Condition Matched</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rule in triggered_rules %}
+                <tr>
+                    <td><code>{{ rule.id }}</code></td>
+                    <td><span class="role-badge">{{ rule.category }}</span></td>
+                    <td><strong style="color: var(--primary);">+{{ rule.points }} pts</strong></td>
+                    <td>{{ rule.msg }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4 style="color: var(--primary); margin-top: 25px; margin-bottom: 10px;">2. Reasoning Explanation Trace</h4>
+        <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+            {% for reason in reasons %}
+            <li style="color: var(--text-main); font-size: 0.95rem;">{{ reason }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Multi-Area Prioritization Summary if present -->
+    {% if evaluated_areas %}
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">📍 Multi-Area Risk & Priority Breakdown</div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Sub-Area Name</th>
+                    <th>Affected Pop</th>
+                    <th>Calculated Priority</th>
+                    <th>Reasoning Summary</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for area in evaluated_areas %}
+                <tr>
+                    <td><strong>{{ area.area_name }}</strong></td>
+                    <td>{{ area.people_affected }}</td>
+                    <td><span class="badge badge-{{ area.priority|lower }}">{{ area.priority }}</span></td>
+                    <td style="font-size: 0.85rem; color: var(--text-muted);">
+                        {% if area.reasons is string %}
+                            {{ area.reasons }}
+                        {% else %}
+                            {{ area.reasons|join('; ') }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div style="display: flex; gap: 15px; margin-top: 20px;">
+        <a href="{{ url_for('disaster.index') }}" class="btn btn-secondary">Analyze Another Disaster</a>
+        <a href="{{ url_for('disaster.dashboard') }}" class="btn btn-primary">Return to Command Dashboard</a>
+    </div>
+
+</div>
+{% endblock %}

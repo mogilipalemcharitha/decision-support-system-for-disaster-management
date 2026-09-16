@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Resource Management & Allocation{% endblock %}
+{% block header_title %}Resource Management & Allocation Center{% endblock %}
+
+{% block content %}
+<div class="grid-cols-2">
+    <!-- Allocation Proposals Queue -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">📋 Recommended Allocation Proposals (Human-in-the-Loop)</div>
+        </div>
+
+        {% if allocations %}
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            {% for alloc in allocations %}
+            <div style="background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div>
+                        <strong style="color: var(--primary);">{{ alloc.resource_type }}</strong> for 
+                        <span>{{ alloc.disaster_type }} ({{ alloc.location }})</span>
+                    </div>
+                    <span class="badge {% if alloc.status == 'APPROVED' %}badge-low{% elif alloc.status == 'REJECTED' %}badge-critical{% else %}badge-high{% endif %}">
+                        {{ alloc.status }}
+                    </span>
+                </div>
+
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+                    System Recommended: <strong>{{ alloc.recommended_qty }} units</strong> | 
+                    Requested By: {{ alloc.requested_by }}
+                </div>
+
+                {% if alloc.status == 'PENDING' %}
+                    {% if session.get('role') in ['System Administrator', 'Disaster Management Authority'] %}
+                    <form action="{{ url_for('resource.allocation_action', allocation_id=alloc.id) }}" method="POST" style="display: flex; gap: 10px; align-items: center;">
+                        <input type="number" name="approved_qty" value="{{ alloc.recommended_qty }}" min="1" style="width: 90px; padding: 6px;">
+                        <button type="submit" name="action" value="APPROVE" class="btn btn-success" style="padding: 6px 12px; font-size: 0.8rem;">Approve</button>
+                        <button type="submit" name="action" value="REJECT" class="btn btn-danger" style="padding: 6px 12px; font-size: 0.8rem;">Reject</button>
+                    </form>
+                    {% else %}
+                    <span style="font-size: 0.8rem; color: var(--warning);">Pending approval by Disaster Management Authority.</span>
+                    {% endif %}
+                {% else %}
+                <div style="font-size: 0.8rem; color: var(--text-muted);">
+                    Decided by: <strong>{{ alloc.approved_by }}</strong> at {{ alloc.updated_at }}
+                    {% if alloc.status == 'APPROVED' %}(Approved Qty: {{ alloc.approved_qty }}){% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color: var(--text-muted);">No allocation proposals queued.</p>
+        {% endif %}
+    </div>
+
+    <!-- Register New Resource Form -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">➕ Register / Add New Emergency Resource</div>
+        </div>
+
+        <form action="{{ url_for('resource.add_resource') }}" method="POST">
+            <div class="form-group">
+                <label>Resource Unit Name</label>
+                <input type="text" name="name" placeholder="e.g. Squad 4 Ambulance Unit" required>
+            </div>
+
+            <div class="grid-cols-2">
+                <div class="form-group">
+                    <label>Category / Type</label>
+                    <select name="resource_type" required>
+                        <option value="Ambulances">Ambulances</option>
+                        <option value="Rescue teams">Rescue teams</option>
+                        <option value="Fire engines">Fire engines</option>
+                        <option value="Medical teams">Medical teams</option>
+                        <option value="Hospital beds">Hospital beds</option>
+                        <option value="Food packets">Food packets</option>
+                        <option value="Drinking water">Drinking water</option>
+                        <option value="Shelters">Shelters</option>
+                        <option value="Rescue equipment">Rescue equipment</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" name="quantity" min="1" value="10" required>
+                </div>
+            </div>
+
+            <div class="grid-cols-2">
+                <div class="form-group">
+                    <label>Base Depot / Location</label>
+                    <input type="text" name="location" placeholder="e.g. Central Station" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Availability Status</label>
+                    <select name="status">
+                        <option value="Available">Available</option>
+                        <option value="Assigned">Assigned</option>
+                        <option value="Busy">Busy</option>
+                        <option value="Unavailable">Unavailable</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Register Resource</button>
+        </form>
+    </div>
+</div>
+
+<!-- Resource Inventory Status Table -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">📦 Total Emergency Resource Inventory</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Resource Name</th>
+                <th>Type</th>
+                <th>Quantity</th>
+                <th>Depot Location</th>
+                <th>Status</th>
+                <th>Last Updated</th>
+                <th>Update Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in resources %}
+            <tr>
+                <td><strong>{{ r.name }}</strong></td>
+                <td><span class="role-badge">{{ r.resource_type }}</span></td>
+                <td><strong>{{ r.quantity }}</strong></td>
+                <td>{{ r.location }}</td>
+                <td>
+                    <span class="badge {% if r.status == 'Available' %}badge-low{% elif r.status == 'Assigned' %}badge-medium{% else %}badge-critical{% endif %}">
+                        {{ r.status }}
+                    </span>
+                </td>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">{{ r.last_updated_time }}</td>
+                <td>
+                    <form action="{{ url_for('resource.update_resource', resource_id=r.id) }}" method="POST" style="display: flex; gap: 6px;">
+                        <input type="number" name="quantity" value="{{ r.quantity }}" min="0" style="width: 65px; padding: 4px;">
+                        <select name="status" style="width: 100px; padding: 4px; font-size: 0.8rem;">
+                            <option value="Available" {% if r.status == 'Available' %}selected{% endif %}>Available</option>
+                            <option value="Assigned" {% if r.status == 'Assigned' %}selected{% endif %}>Assigned</option>
+                            <option value="Busy" {% if r.status == 'Busy' %}selected{% endif %}>Busy</option>
+                            <option value="Unavailable" {% if r.status == 'Unavailable' %}selected{% endif %}>Unavailable</option>
+                        </select>
+                        <button type="submit" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;">Save</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

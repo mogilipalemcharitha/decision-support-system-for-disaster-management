@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Analyze Disaster Incident{% endblock %}
+{% block header_title %}Disaster Incident Analysis Portal{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 900px; margin: 0 auto;">
+    <div class="card-header">
+        <div class="card-title">📝 New Disaster Incident Report & Expert Analysis</div>
+    </div>
+
+    <form action="{{ url_for('disaster.analyze') }}" method="POST">
+
+        <div class="grid-cols-2">
+            <div class="form-group">
+                <label>Disaster Type</label>
+                <select name="disaster_type" id="disaster_type" onchange="toggleDisasterFields()" required>
+                    <option value="Flood">Flood</option>
+                    <option value="Earthquake">Earthquake</option>
+                    <option value="Cyclone">Cyclone</option>
+                    <option value="Fire">Fire</option>
+                    <option value="Landslide">Landslide</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Primary Location / Region Name</label>
+                <input type="text" name="location" placeholder="e.g. Downtown Metro Zone" required>
+            </div>
+        </div>
+
+        <div class="grid-cols-2">
+            <div class="form-group">
+                <label>Total Affected Population</label>
+                <input type="number" name="people_affected" min="0" value="1200" required>
+            </div>
+
+            <div class="form-group">
+                <label>Medical Emergency Severity</label>
+                <select name="medical_emergency" required>
+                    <option value="HIGH">High</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="LOW">Low</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid-cols-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <div class="form-group">
+                <label>Road Access Status</label>
+                <select name="road_status" required>
+                    <option value="BLOCKED">Blocked</option>
+                    <option value="ACCESSIBLE">Accessible</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Available Ambulances</label>
+                <input type="number" name="ambulances" min="0" value="2" required>
+            </div>
+
+            <div class="form-group">
+                <label>Available Hospital Beds</label>
+                <input type="number" name="hospital_beds" min="0" value="5" required>
+            </div>
+        </div>
+
+        <!-- Dynamic Disaster-Specific Knowledge Fields -->
+        <div id="disaster_specific_box" style="background: #0f172a; padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin: 15px 0;">
+            <h4 style="color: var(--primary); margin-bottom: 12px;" id="specific_box_title">Flood Specific Knowledge Parameters</h4>
+            
+            <div id="fields_flood">
+                <div class="grid-cols-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
+                    <div class="form-group">
+                        <label>Water Level (Meters above danger level)</label>
+                        <input type="number" step="0.1" name="water_level" value="3.2">
+                    </div>
+                    <div class="form-group">
+                        <label>Rainfall Intensity (mm/hr)</label>
+                        <input type="number" step="1" name="rainfall" value="110">
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 25px;">
+                        <input type="checkbox" name="evacuation_needed" id="evac" value="1" checked style="width: auto;">
+                        <label for="evac" style="margin-bottom: 0;">Urgent Evacuation Needed</label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="fields_earthquake" style="display: none;">
+                <div class="grid-cols-2">
+                    <div class="form-group">
+                        <label>Building Damage / Collapse %</label>
+                        <input type="number" step="1" name="building_damage_pct" value="60">
+                    </div>
+                    <div class="form-group">
+                        <label>Trapped Victims Count</label>
+                        <input type="number" name="trapped_people" value="25">
+                    </div>
+                </div>
+            </div>
+
+            <div id="fields_cyclone" style="display: none;">
+                <div class="grid-cols-2">
+                    <div class="form-group">
+                        <label>Wind Speed (km/h)</label>
+                        <input type="number" step="1" name="wind_speed_kmh" value="160">
+                    </div>
+                    <div class="form-group">
+                        <label>Coastal Storm Surge Risk</label>
+                        <select name="coastal_surge_risk">
+                            <option value="HIGH">High</option>
+                            <option value="MEDIUM">Medium</option>
+                            <option value="LOW">Low</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="fields_fire" style="display: none;">
+                <div class="grid-cols-2">
+                    <div class="form-group">
+                        <label>Fire Intensity / Severity</label>
+                        <select name="fire_severity">
+                            <option value="CRITICAL">Critical</option>
+                            <option value="HIGH">High</option>
+                            <option value="MEDIUM">Medium</option>
+                            <option value="LOW">Low</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Toxic Smoke Hazard</label>
+                        <select name="smoke_hazard">
+                            <option value="HIGH">High</option>
+                            <option value="LOW">Low</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="fields_landslide" style="display: none;">
+                <div class="form-group">
+                    <label>Terrain Slope Stability Risk</label>
+                    <select name="terrain_risk">
+                        <option value="HIGH">High Slope Hazard</option>
+                        <option value="MEDIUM">Medium Slope Hazard</option>
+                        <option value="LOW">Low Hazard</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Multi-Area Registration -->
+        <div style="margin: 25px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h4 style="color: var(--primary);">📍 Affected Sub-Areas (Multi-Area Prioritization)</h4>
+                <button type="button" class="btn btn-secondary" onclick="addAreaRow()" style="font-size: 0.8rem;">+ Add Sub-Area</button>
+            </div>
+            
+            <div id="area_rows_container" style="display: flex; flex-direction: column; gap: 10px;">
+                <div class="area-row" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; background: #0f172a; padding: 10px; border-radius: 6px;">
+                    <input type="text" name="area_name[]" placeholder="Sub-Area Name (e.g. Sector 4)" value="Area A - North Zone">
+                    <input type="number" name="area_population[]" placeholder="Population" value="800">
+                    <select name="area_medical[]">
+                        <option value="HIGH">Med: HIGH</option>
+                        <option value="MEDIUM">Med: MED</option>
+                        <option value="LOW">Med: LOW</option>
+                    </select>
+                    <select name="area_road[]">
+                        <option value="BLOCKED">Road: BLOCKED</option>
+                        <option value="ACCESSIBLE">Road: OK</option>
+                    </select>
+                    <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()" style="padding: 4px 10px;">X</button>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; font-size: 1rem; padding: 14px;">
+            ⚡ Run Expert System Analysis & Calculate Priorities
+        </button>
+
+    </form>
+</div>
+
+<script>
+function toggleDisasterFields() {
+    const type = document.getElementById('disaster_type').value;
+    document.getElementById('specific_box_title').innerText = type + ' Specific Knowledge Parameters';
+    
+    ['flood', 'earthquake', 'cyclone', 'fire', 'landslide'].forEach(t => {
+        document.getElementById('fields_' + t).style.display = (t === type.toLowerCase()) ? 'block' : 'none';
+    });
+}
+
+function addAreaRow() {
+    const container = document.getElementById('area_rows_container');
+    const div = document.createElement('div');
+    div.className = 'area-row';
+    div.style = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; background: #0f172a; padding: 10px; border-radius: 6px;';
+    div.innerHTML = `
+        <input type="text" name="area_name[]" placeholder="Sub-Area Name">
+        <input type="number" name="area_population[]" placeholder="Population" value="500">
+        <select name="area_medical[]">
+            <option value="HIGH">Med: HIGH</option>
+            <option value="MEDIUM" selected>Med: MED</option>
+            <option value="LOW">Med: LOW</option>
+        </select>
+        <select name="area_road[]">
+            <option value="BLOCKED">Road: BLOCKED</option>
+            <option value="ACCESSIBLE" selected>Road: OK</option>
+        </select>
+        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()" style="padding: 4px 10px;">X</button>
+    `;
+    container.appendChild(div);
+}
+</script>
+{% endblock %}
