@@ -8,7 +8,10 @@
 {% if session.get('role') in ['System Administrator', 'Disaster Management Authority'] %}
 <div class="card">
     <div class="card-header">
-        <div class="card-title">🗳️ Propose New Emergency Decision for Stakeholder Voting</div>
+        <div class="card-title">
+            <i data-lucide="vote"></i>
+            <span>Propose New Emergency Decision for Stakeholder Voting</span>
+        </div>
     </div>
 
     <form action="{{ url_for('gdss.create_decision') }}" method="POST">
@@ -38,63 +41,75 @@
             <input type="text" name="expert_recommendation" placeholder="e.g. Expert System recommends deploying to Area A based on higher risk score.">
         </div>
 
-        <button type="submit" class="btn btn-primary">+ Launch Decision Collaboration</button>
+        <button type="submit" class="btn btn-primary">
+            <i data-lucide="plus-circle"></i>
+            <span>Launch Decision Collaboration</span>
+        </button>
     </form>
 </div>
 {% endif %}
 
 <!-- Decisions Grid -->
-<div style="display: flex; flex-direction: column; gap: 25px;">
+<div style="display: flex; flex-direction: column; gap: 24px;">
     {% for item in decisions %}
     {% set d = item.details %}
     <div class="card" style="border-left: 5px solid {% if d.status == 'FINALIZED' %}var(--success){% else %}var(--warning){% endif %};">
         <div class="card-header">
             <div>
-                <span class="badge {% if d.status == 'FINALIZED' %}badge-low{% else %}badge-high{% endif %}">{{ d.status }}</span>
-                <h3 style="margin-top: 5px; color: var(--text-main);">#{{ d.id }} - {{ d.title }}</h3>
-                <div style="font-size: 0.85rem; color: var(--text-muted);">Disaster: {{ d.disaster_type }} at {{ d.location }} | Proposed: {{ d.created_at }}</div>
+                <span class="badge {% if d.status == 'FINALIZED' %}badge-low{% else %}badge-medium{% endif %}">{{ d.status }}</span>
+                <h3 style="margin-top: 6px; color: var(--text-main); font-size: 1.25rem; font-weight: 700;">#{{ d.id }} - {{ d.title }}</h3>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Disaster: <strong>{{ d.disaster_type }}</strong> at {{ d.location }} | Proposed: {{ d.created_at }}</div>
             </div>
 
             {% if item.total_votes > 0 %}
-            <div style="text-align: right; background: #0f172a; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--border);">
-                <div style="font-size: 0.8rem; color: var(--text-muted);">Calculated Consensus</div>
-                <div style="font-size: 1.4rem; font-weight: 700; color: var(--success);">{{ item.consensus_pct }}%</div>
-                <div style="font-size: 0.75rem; color: var(--info);">Leading Option: <strong>{{ item.winning_option }}</strong></div>
+            <div style="text-align: right; background: var(--bg-main); padding: 12px 20px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Calculated Consensus</div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: var(--success); line-height: 1.2;">{{ item.consensus_pct }}%</div>
+                <div style="font-size: 0.8rem; color: var(--info); margin-top: 2px;">Leading Option: <strong>{{ item.winning_option }}</strong></div>
             </div>
             {% endif %}
         </div>
 
-        <div style="background: #0f172a; padding: 14px; border-radius: 8px; margin-bottom: 20px; font-size: 0.95rem;">
-            <strong>Issue Description:</strong> {{ d.issue_description }}
+        <div style="background: var(--bg-main); padding: 16px; border-radius: var(--radius-md); margin-bottom: 20px; font-size: 0.95rem; border: 1px solid var(--border);">
+            <strong style="color: var(--text-main);">Issue Description:</strong> {{ d.issue_description }}
             {% if d.expert_recommendation %}
-                <div style="margin-top: 8px; color: var(--primary); font-size: 0.85rem;">
-                    <strong>🤖 Expert System Baseline:</strong> {{ d.expert_recommendation }}
+                <div style="margin-top: 10px; color: var(--primary); font-size: 0.875rem; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="bot" style="width: 18px; height: 18px;"></i>
+                    <span><strong>Expert System Baseline:</strong> {{ d.expert_recommendation }}</span>
                 </div>
             {% endif %}
         </div>
 
         <div class="grid-cols-2">
             <!-- Stakeholder Voting Interface -->
-            <div style="background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
-                <h4 style="color: var(--primary); margin-bottom: 12px;">🗳️ Cast Stakeholder Vote</h4>
+            <div style="background: #FFFFFF; padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+                <h4 style="color: var(--primary); margin-bottom: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="check-square" style="width: 18px; height: 18px;"></i>
+                    <span>Cast Stakeholder Vote</span>
+                </h4>
                 
                 {% if d.status == 'OPEN' %}
-                <form action="{{ url_for('gdss.cast_vote', decision_id=d.id) }}" method="POST" style="margin-bottom: 15px;">
+                <form action="{{ url_for('gdss.cast_vote', decision_id=d.id) }}" method="POST" style="margin-bottom: 16px;">
                     <div class="form-group">
                         <label>Select Your Choice / Target Area</label>
                         <input type="text" name="vote_option" placeholder="e.g. Area A or Option 1" required>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="font-size: 0.85rem;">Cast / Update Vote</button>
+                    <button type="submit" class="btn btn-primary" style="font-size: 0.85rem;">
+                        <i data-lucide="check"></i> Cast / Update Vote
+                    </button>
                 </form>
                 {% else %}
-                <div style="color: var(--success); font-weight: 600; margin-bottom: 15px;">🔒 Decision is FINALIZED. Voting is closed.</div>
+                <div style="color: var(--success); font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 6px;">
+                    <i data-lucide="lock" style="width: 16px; height: 16px;"></i>
+                    <span>Decision is FINALIZED. Voting is closed.</span>
+                </div>
                 {% endif %}
 
-                <h5 style="color: var(--text-muted); margin-bottom: 8px;">Voting Results Breakdown ({{ item.total_votes }} votes total):</h5>
-                <ul style="list-style: none; display: flex; flex-direction: column; gap: 6px;">
+                <h5 style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 10px;">Voting Results Breakdown ({{ item.total_votes }} votes total):</h5>
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
                     {% for opt, count in item.vote_counts.items() %}
-                    <li style="display: flex; justify-content: space-between; background: var(--bg-card); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem;">
-                        <span>Option: <strong>{{ opt }}</strong></span>
+                    <li style="display: flex; justify-content: space-between; background: var(--bg-main); padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 0.875rem;">
+                        <span>Option: <strong style="color: var(--text-main);">{{ opt }}</strong></span>
                         <span style="color: var(--primary); font-weight: 700;">{{ count }} votes</span>
                     </li>
                     {% else %}
@@ -104,26 +119,31 @@
             </div>
 
             <!-- Stakeholder Opinions Feed -->
-            <div style="background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
-                <h4 style="color: var(--primary); margin-bottom: 12px;">💬 Stakeholder Opinions & Perspectives</h4>
+            <div style="background: #FFFFFF; padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+                <h4 style="color: var(--primary); margin-bottom: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="message-circle" style="width: 18px; height: 18px;"></i>
+                    <span>Stakeholder Opinions & Perspectives</span>
+                </h4>
 
                 {% if d.status == 'OPEN' %}
-                <form action="{{ url_for('gdss.add_opinion', decision_id=d.id) }}" method="POST" style="margin-bottom: 15px;">
+                <form action="{{ url_for('gdss.add_opinion', decision_id=d.id) }}" method="POST" style="margin-bottom: 16px;">
                     <div class="form-group">
                         <textarea name="opinion_text" rows="2" placeholder="Provide your agency perspective or concern..." required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-secondary" style="font-size: 0.85rem;">Submit Opinion</button>
+                    <button type="submit" class="btn btn-secondary" style="font-size: 0.85rem;">
+                        <i data-lucide="message-square"></i> Submit Opinion
+                    </button>
                 </form>
                 {% endif %}
 
-                <div style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                <div style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px;">
                     {% for op in item.opinions %}
-                    <div style="background: var(--bg-card); padding: 10px; border-radius: 6px; font-size: 0.85rem;">
+                    <div style="background: var(--bg-main); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 0.875rem;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                             <strong style="color: var(--info);">{{ op.username }} (<span class="role-badge" style="font-size: 0.65rem;">{{ op.role }}</span>)</strong>
-                            <small style="color: var(--text-muted);">{{ op.created_at }}</small>
+                            <small style="color: var(--text-muted); font-size: 0.75rem;">{{ op.created_at }}</small>
                         </div>
-                        <div>{{ op.opinion_text }}</div>
+                        <div style="color: var(--text-main);">{{ op.opinion_text }}</div>
                     </div>
                     {% else %}
                     <div style="color: var(--text-muted); font-size: 0.85rem;">No stakeholder opinions submitted yet.</div>
@@ -134,24 +154,34 @@
 
         <!-- Authority Finalization Panel -->
         {% if d.status == 'OPEN' and session.get('role') in ['System Administrator', 'Disaster Management Authority'] %}
-        <div style="margin-top: 20px; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--warning); padding: 16px; border-radius: 8px;">
-            <h4 style="color: var(--warning); margin-bottom: 8px;">⚡ Authorized Commander Decision Finalization</h4>
-            <form action="{{ url_for('gdss.finalize_decision', decision_id=d.id) }}" method="POST" style="display: flex; gap: 10px;">
+        <div style="margin-top: 20px; background: var(--warning-bg); border: 1px solid var(--warning-border); padding: 18px; border-radius: var(--radius-md);">
+            <h4 style="color: #B45309; margin-bottom: 10px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="shield-check" style="width: 20px; height: 20px;"></i>
+                <span>Authorized Commander Decision Finalization</span>
+            </h4>
+            <form action="{{ url_for('gdss.finalize_decision', decision_id=d.id) }}" method="POST" style="display: flex; gap: 12px;">
                 <input type="text" name="final_decision" placeholder="Enter final binding decision statement..." required style="flex: 1;">
-                <button type="submit" class="btn btn-warning" style="white-space: nowrap;">🔒 Lock & Finalize Decision</button>
+                <button type="submit" class="btn btn-warning" style="white-space: nowrap;">
+                    <i data-lucide="lock"></i> Lock & Finalize Decision
+                </button>
             </form>
         </div>
         {% elif d.status == 'FINALIZED' %}
-        <div style="margin-top: 15px; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--success); padding: 14px; border-radius: 8px; font-size: 0.9rem;">
-            <strong style="color: var(--success);">Finalized Decision Statement:</strong> {{ d.final_decision }}
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Finalized by Authority Commander: <strong>{{ d.finalized_by }}</strong></div>
+        <div style="margin-top: 20px; background: var(--success-bg); border: 1px solid var(--success-border); padding: 16px; border-radius: var(--radius-md); font-size: 0.9rem;">
+            <strong style="color: var(--success); font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="check-circle-2" style="width: 18px; height: 18px;"></i>
+                <span>Finalized Decision Statement:</span>
+            </strong>
+            <p style="color: var(--text-main); margin-top: 4px; font-weight: 500;">{{ d.final_decision }}</p>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">Finalized by Authority Commander: <strong>{{ d.finalized_by }}</strong></div>
         </div>
         {% endif %}
 
     </div>
     {% else %}
-    <div class="card">
-        <p style="color: var(--text-muted);">No emergency decisions created yet.</p>
+    <div class="card" style="text-align: center; padding: 40px; color: var(--text-muted);">
+        <i data-lucide="inbox" style="width: 40px; height: 40px; margin-bottom: 8px; color: var(--text-light);"></i>
+        <p>No emergency decisions created yet.</p>
     </div>
     {% endfor %}
 </div>

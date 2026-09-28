@@ -5,9 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Disaster Management Expert System{% endblock %}</title>
     
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <!-- CSS Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <!-- Leaflet.js OpenStreetMap CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -15,30 +23,75 @@
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+<body class="{% if not session.get('user_id') %}login-page-body{% endif %}">
 
     {% if session.get('user_id') %}
+    <!-- Mobile Sidebar Backdrop -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileSidebar()"></div>
+
     <!-- Sidebar Navigation -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="appSidebar">
         <div class="sidebar-header">
-            <div class="sidebar-brand">🚨 DISASTER DSS</div>
+            <div class="sidebar-brand-icon">
+                <i data-lucide="shield-alert"></i>
+            </div>
+            <div class="sidebar-brand">
+                <span class="brand-title">EOC COMMAND</span>
+                <span class="brand-subtitle">DISASTER DSS</span>
+            </div>
         </div>
         
+        <div class="nav-section-title">MAIN NAVIGATION</div>
         <ul class="nav-links">
-            <li><a href="{{ url_for('disaster.dashboard') }}" class="nav-link {% if request.endpoint == 'disaster.dashboard' %}active{% endif %}">📊 Dashboard</a></li>
-            <li><a href="{{ url_for('disaster.index') }}" class="nav-link {% if request.endpoint == 'disaster.index' %}active{% endif %}">⚡ Analyze Incident</a></li>
-            <li><a href="{{ url_for('resource.index') }}" class="nav-link {% if request.endpoint == 'resource.index' %}active{% endif %}">📦 Resources</a></li>
-            <li><a href="{{ url_for('gdss.index') }}" class="nav-link {% if request.endpoint == 'gdss.index' %}active{% endif %}">🗳️ GDSS Decisions</a></li>
-            <li><a href="{{ url_for('analytics.index') }}" class="nav-link {% if request.endpoint == 'analytics.index' %}active{% endif %}">📈 Analytics & Evaluation</a></li>
-            <li><a href="{{ url_for('gdss.history') }}" class="nav-link {% if request.endpoint == 'gdss.history' %}active{% endif %}">📜 Audit History</a></li>
+            <li>
+                <a href="{{ url_for('disaster.dashboard') }}" class="nav-link {% if request.endpoint == 'disaster.dashboard' %}active{% endif %}">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('disaster.index') }}" class="nav-link {% if request.endpoint == 'disaster.index' %}active{% endif %}">
+                    <i data-lucide="activity"></i>
+                    <span>Analyze Incident</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('gdss.index') }}" class="nav-link {% if request.endpoint == 'gdss.index' %}active{% endif %}">
+                    <i data-lucide="vote"></i>
+                    <span>GDSS Decisions</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('resource.index') }}" class="nav-link {% if request.endpoint == 'resource.index' %}active{% endif %}">
+                    <i data-lucide="boxes"></i>
+                    <span>Resource Center</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('analytics.index') }}" class="nav-link {% if request.endpoint == 'analytics.index' %}active{% endif %}">
+                    <i data-lucide="bar-chart-3"></i>
+                    <span>Analytics & Eval</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('gdss.history') }}" class="nav-link {% if request.endpoint == 'gdss.history' %}active{% endif %}">
+                    <i data-lucide="history"></i>
+                    <span>Audit History</span>
+                </a>
+            </li>
         </ul>
 
         <div class="user-profile">
-            <div style="font-weight: 600;">{{ session.get('full_name') }}</div>
-            <span class="role-badge">{{ session.get('role') }}</span>
-            <div style="margin-top: 10px;">
-                <a href="{{ url_for('auth.logout') }}" style="color: var(--danger); text-decoration: none; font-size: 0.85rem; font-weight: 600;">🔒 Logout</a>
+            <div class="user-avatar">
+                <i data-lucide="user"></i>
             </div>
+            <div class="user-info">
+                <div class="user-name">{{ session.get('full_name') }}</div>
+                <span class="role-badge">{{ session.get('role') }}</span>
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn" title="Sign Out">
+                <i data-lucide="log-out"></i>
+            </a>
         </div>
     </aside>
     {% endif %}
@@ -47,9 +100,18 @@
     <div class="main-wrapper" {% if not session.get('user_id') %}style="margin-left: 0;"{% endif %}>
         {% if session.get('user_id') %}
         <header class="top-bar">
-            <div class="page-title">{% block header_title %}Command Center{% endblock %}</div>
-            <div style="font-size: 0.85rem; color: var(--text-muted);">
-                System Status: <span style="color: var(--success); font-weight: 700;">🟢 ACTIVE OPERATIONAL</span>
+            <div class="top-bar-left">
+                <button class="mobile-toggle-btn" onclick="toggleMobileSidebar()">
+                    <i data-lucide="menu"></i>
+                </button>
+                <h1 class="page-title">{% block header_title %}Command Center{% endblock %}</h1>
+            </div>
+
+            <div class="top-bar-right">
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">OPERATIONAL EOC</span>
+                </div>
             </div>
         </header>
         {% endif %}
@@ -58,9 +120,27 @@
             <!-- Flash Alert Notifications -->
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
+                    <div class="flash-messages-container">
                     {% for category, msg in messages %}
-                        <div class="flash-alert flash-{{ category }}">{{ msg }}</div>
+                        <div class="flash-alert flash-{{ category }}">
+                            <div class="flash-icon">
+                                {% if category == 'success' %}
+                                    <i data-lucide="check-circle-2"></i>
+                                {% elif category == 'danger' or category == 'critical' %}
+                                    <i data-lucide="alert-circle"></i>
+                                {% elif category == 'warning' %}
+                                    <i data-lucide="alert-triangle"></i>
+                                {% else %}
+                                    <i data-lucide="info"></i>
+                                {% endif %}
+                            </div>
+                            <div class="flash-text">{{ msg }}</div>
+                            <button class="flash-close" onclick="this.parentElement.remove()">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
                     {% endfor %}
+                    </div>
                 {% endif %}
             {% endwith %}
 
@@ -69,5 +149,16 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+    <script>
+        lucide.createIcons();
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('appSidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar && backdrop) {
+                sidebar.classList.toggle('active');
+                backdrop.classList.toggle('active');
+            }
+        }
+    </script>
 </body>
 </html>

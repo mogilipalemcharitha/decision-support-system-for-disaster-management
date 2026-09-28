@@ -7,38 +7,79 @@
 <!-- Academic Evaluation Metrics Header -->
 <div class="card">
     <div class="card-header">
-        <div class="card-title">📊 Academic System Evaluation Metrics</div>
+        <div class="card-title">
+            <i data-lucide="line-chart"></i>
+            <span>Academic System Evaluation Metrics</span>
+        </div>
     </div>
 
     <div class="grid-cols-4">
         <div class="metric-card info">
-            <div class="metric-title">Disasters Evaluated</div>
+            <div class="metric-card-top">
+                <div class="metric-title">Disasters Evaluated</div>
+                <div class="metric-icon-badge">
+                    <i data-lucide="file-spread-sheet"></i>
+                </div>
+            </div>
             <div class="metric-value">{{ total_disasters }}</div>
+            <div class="metric-subtitle">Total recorded events</div>
         </div>
+
         <div class="metric-card warning">
-            <div class="metric-title">Total Affected Population</div>
+            <div class="metric-card-top">
+                <div class="metric-title">Total Affected Population</div>
+                <div class="metric-icon-badge">
+                    <i data-lucide="users"></i>
+                </div>
+            </div>
             <div class="metric-value">{{ total_affected_pop }}</div>
+            <div class="metric-subtitle">Across all impacted zones</div>
         </div>
+
         <div class="metric-card success">
-            <div class="metric-title">Finalized Decisions</div>
+            <div class="metric-card-top">
+                <div class="metric-title">Finalized Decisions</div>
+                <div class="metric-icon-badge">
+                    <i data-lucide="check-circle-2"></i>
+                </div>
+            </div>
             <div class="metric-value">{{ total_decisions_made }}</div>
+            <div class="metric-subtitle">GDSS binding resolutions</div>
         </div>
+
         <div class="metric-card critical">
-            <div class="metric-title">Stakeholder Votes Cast</div>
+            <div class="metric-card-top">
+                <div class="metric-title">Stakeholder Votes Cast</div>
+                <div class="metric-icon-badge">
+                    <i data-lucide="vote"></i>
+                </div>
+            </div>
             <div class="metric-value">{{ total_votes_cast }}</div>
+            <div class="metric-subtitle">Multi-agency participation</div>
         </div>
     </div>
 
     <div class="grid-cols-2">
         <div class="metric-card success">
-            <div class="metric-title">Avg Stakeholder Consensus Rate</div>
+            <div class="metric-card-top">
+                <div class="metric-title">Avg Stakeholder Consensus Rate</div>
+                <div class="metric-icon-badge">
+                    <i data-lucide="award"></i>
+                </div>
+            </div>
             <div class="metric-value">{{ avg_consensus }}%</div>
-            <small style="color: var(--text-muted);">Calculated quantitative consensus agreement across GDSS decision sessions.</small>
+            <div class="metric-subtitle">Quantitative consensus agreement across GDSS decision sessions</div>
         </div>
+
         <div class="metric-card info">
-            <div class="metric-title">System Audit Log Events</div>
+            <div class="metric-card-top">
+                <div class="metric-title">System Audit Log Events</div>
+                <div class="metric-icon-badge">
+                    <i data-lucide="history"></i>
+                </div>
+            </div>
             <div class="metric-value">{{ total_activities }}</div>
-            <small style="color: var(--text-muted);">Auditable trace records captured in real-time timeline.</small>
+            <div class="metric-subtitle">Auditable trace records captured in real-time timeline</div>
         </div>
     </div>
 </div>
@@ -47,28 +88,47 @@
 <div class="grid-cols-2">
     <div class="card">
         <div class="card-header">
-            <div class="card-title">📈 Priority Score Distribution</div>
+            <div class="card-title">
+                <i data-lucide="pie-chart"></i>
+                <span>Priority Score Distribution</span>
+            </div>
         </div>
-        <canvas id="priorityChart" height="220"></canvas>
+        <div style="height: 260px; position: relative;">
+            <canvas id="priorityChart"></canvas>
+        </div>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <div class="card-title">🌪️ Disaster Events by Disaster Type</div>
+            <div class="card-title">
+                <i data-lucide="bar-chart-2"></i>
+                <span>Disaster Events by Disaster Type</span>
+            </div>
         </div>
-        <canvas id="typeChart" height="220"></canvas>
+        <div style="height: 260px; position: relative;">
+            <canvas id="typeChart"></canvas>
+        </div>
     </div>
 </div>
 
 <div class="card">
     <div class="card-header">
-        <div class="card-title">📦 Resource Inventory Stock Capacity</div>
+        <div class="card-title">
+            <i data-lucide="boxes"></i>
+            <span>Resource Inventory Stock Capacity</span>
+        </div>
     </div>
-    <canvas id="resourceChart" height="180"></canvas>
+    <div style="height: 240px; position: relative;">
+        <canvas id="resourceChart"></canvas>
+    </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    // Chart colors for light theme
+    const textColor = '#374151';
+    const gridColor = '#E2E8F0';
+
     // 1. Priority Distribution Doughnut Chart
     const priorityCtx = document.getElementById('priorityChart').getContext('2d');
     new Chart(priorityCtx, {
@@ -82,13 +142,19 @@ document.addEventListener("DOMContentLoaded", function () {
                     {{ priority_dict.MEDIUM }},
                     {{ priority_dict.LOW }}
                 ],
-                backgroundColor: ['#ef4444', '#f59e0b', '#06b6d4', '#10b981']
+                backgroundColor: ['#DC2626', '#F59E0B', '#0EA5E9', '#16A34A'],
+                borderWidth: 2,
+                borderColor: '#FFFFFF'
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
-                legend: { labels: { color: '#f8fafc' } }
+                legend: {
+                    position: 'bottom',
+                    labels: { color: textColor, font: { family: 'Inter', size: 12, weight: '600' } }
+                }
             }
         }
     });
@@ -102,17 +168,28 @@ document.addEventListener("DOMContentLoaded", function () {
             datasets: [{
                 label: 'Disaster Count',
                 data: {{ type_dict.values()|list|tojson }},
-                backgroundColor: '#3b82f6'
+                backgroundColor: '#2563EB',
+                borderRadius: 6
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
-                x: { ticks: { color: '#f8fafc' } },
-                y: { ticks: { color: '#f8fafc' }, beginAtZero: true }
+                x: {
+                    ticks: { color: textColor, font: { family: 'Inter', size: 11 } },
+                    grid: { display: false }
+                },
+                y: {
+                    ticks: { color: textColor, font: { family: 'Inter', size: 11 } },
+                    grid: { color: gridColor },
+                    beginAtZero: true
+                }
             },
             plugins: {
-                legend: { labels: { color: '#f8fafc' } }
+                legend: {
+                    labels: { color: textColor, font: { family: 'Inter', size: 12, weight: '600' } }
+                }
             }
         }
     });
@@ -126,17 +203,28 @@ document.addEventListener("DOMContentLoaded", function () {
             datasets: [{
                 label: 'Stock Quantity',
                 data: {{ resource_dict.values()|list|tojson }},
-                backgroundColor: '#10b981'
+                backgroundColor: '#16A34A',
+                borderRadius: 6
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
-                x: { ticks: { color: '#f8fafc' } },
-                y: { ticks: { color: '#f8fafc' }, beginAtZero: true }
+                x: {
+                    ticks: { color: textColor, font: { family: 'Inter', size: 11 } },
+                    grid: { display: false }
+                },
+                y: {
+                    ticks: { color: textColor, font: { family: 'Inter', size: 11 } },
+                    grid: { color: gridColor },
+                    beginAtZero: true
+                }
             },
             plugins: {
-                legend: { labels: { color: '#f8fafc' } }
+                legend: {
+                    labels: { color: textColor, font: { family: 'Inter', size: 12, weight: '600' } }
+                }
             }
         }
     });
